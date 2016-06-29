@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <h1>Entries for company</h1>
+                        <div>
+                            {% for route in routes %}
+                                {{route.route_date}}
+                            {% endfor %}
+                        </div>
+                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+                    
+{% endblock %}

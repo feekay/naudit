@@ -1,0 +1,7 @@
+*.pyc
+__pycache__
+myvenv
+db.sqlite3
+/media
+.DS_Store
+/audit/settings.py

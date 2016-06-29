@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block main %}
+  <table>
+                        <tr>
+                            <th>Name</th>
+                            <th>Count</th>
+                        </tr>
+                        {% for emp in employees %}
+                            <tr>
+                                <td>{{emp.name}}</td>
+                                <td>{{emp.count}} </td>
+                            </tr>
+                        {% endfor %}
+                        
+                       </table>
+                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+                                        
+{% endblock %}

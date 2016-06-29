@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <h1>Add an entry</h1>
+                            <form  enctype="multipart/form-data" method="post" action="" >
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                {{ form2.as_p }}
+                                {{ form3.as_p }}
+                                <input type=submit />
+                            </form>
+                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+                                        
+{% endblock %}
