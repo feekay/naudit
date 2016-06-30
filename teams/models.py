@@ -107,7 +107,6 @@ class Entry_based(models.Model):
     rate = models.IntegerField()
     entries = models.ManyToManyField(Entry)
     
-    #------------------------------------------------------------------------------#
     def entry_count(self):
         return self.entries.filter(Q(approved= True)|Q(cleared = True)|Q(finalized = True)).count()
 
@@ -117,3 +116,13 @@ class Entry_based(models.Model):
     def __unicode__(self):
         return str(self.details) +" "+ self.rate
 
+
+#------------------------------------------------------------------------------#
+class Message(models.Model):
+    time = models.DateTimeField(default = datetime.now)
+    text = models.CharField(max_length = 500)
+    to = models.ManyToManyField(User, related_name = "reciever")
+    frm = models.ForeignKey(User, related_name = "sender", null = False)
+
+    def __unicode__(self):
+        return str(self.text)

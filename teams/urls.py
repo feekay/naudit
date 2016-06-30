@@ -35,4 +35,8 @@ urlpatterns = [
     url(r'^add_route/$', views.add_route),
     url(r'^add_entry/$', views.add_entry),
     url(r'^settings/$', views.settings),
+    url(r'^suggest_member/$', views.suggest_member),
+    url(r'^messages/get/$', views.get_messages),
+    url(r'^messages/send/$', views.send_message),
+    url(r'^messages/$', views.messages),
 ]

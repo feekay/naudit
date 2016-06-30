@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div id= "message-box">
+    </div>
+    <div class="row">
+        <div class="col-sm-11">
+        {% csrf_token %}
+        <input type="text" id="message" name="message" placeholder="Type a message"/>
+        </div>
+        <div class="col-sm-1">
+        <button class="btn btn-primary send-message">Send</button>
+        </div>
+    </div>
+    <div><ul id='suggestion-box'></ul></div>
+{% endblock %} 
+{% block script %}
+    
+<script>    
+ var mentions =[];
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+var csrftoken = getCookie('csrftoken');
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+$(document).ready(function(){
+
+
+    //Adding Suggestion list clicks
+    //Attach event to suggestion list
+    $('ul#suggestion-box').on('click','li' ,function(){
+   console.log(mentions);
+   mentions.push($(this).attr("data"));
+   var value = $('#message').val();
+   var list = value.split(" ");
+   list[list.length-1] = $(this).attr("data-name");
+   var text = list.join(" ");
+   $('#message').val(text);
+   
+   $('#suggestion-box').html("\n");
+    });
+
+
+  //Update the message box
+  setInterval(message_box, 30000);
+  function message_box() {
+    console.log("Refreshed");
+    $("#message-box").load('/main/messages/get');
+    updateScroll();
+    }
+    function updateScroll(){
+        var position =  $("#message-box")[0].scrollHeight;
+        console.log(position);
+         $("#message-box")[0].scrollTop= position;
+    }
+  
+  //Load Once at start
+  message_box();
+
+});
+
+$('.send-message').click(function(){
+    console.log("Send");
+    message= $('#message').val();
+    $.ajax({
+        url: "/main/messages/send/",
+        method:'POST',
+        data: JSON.stringify({
+         message: message,
+         mentions: mentions
+        }),
+        contentType: "application/json",
+        success: function(){
+        console.log("Clearing");
+        $('#message').val("");
+        text = "<li class=\"text-right\">" + message +"</li>";
+        $('#message-box').append(text);
+        mentions = [];
+        }
+    });
+});  
+
+$('#message').keypress(function (e) {
+ var key = e.which;
+ if(key == 13)  // Send on Enter
+  {
+    console.log("Send");
+    message= $('#message').val();
+    $.ajax({
+        url: "/main/messages/send/",
+        method:'POST',
+        data: JSON.stringify({
+         message: message,
+         mentions: mentions
+        }),
+        contentType: "application/json",
+        success: function(){
+        console.log("Clearing");
+        $('#message').val("");
+        text = "<li class=\"text-right\">" + message +"</li>";
+        $('#message-box').append(text);
+        mentions = [];
+        }
+    });
+  }
+  
+  else    //Suggest on '@'
+  {
+    var value = $(this).val();
+    var list = value.split(" ");
+    var query = list[list.length-1];
+    console.log(query);
+    if(query[0]==='@'){
+    query = query.slice(1)
+    $.get('/main/suggest_member/', {'suggestion': query}, function(data){
+         console.log(data)
+         if (data[0]){
+            div=""
+            for(i=0; i<data.length; ++i){
+            console.log(i)
+            view ="<p>"+ data[i]["fields"]["user"]+"</p>";
+            view +="<p>"+data[i]["fields"]["member_type"]+"</p>"
+            img = "<img src=/media/" +data[i]["fields"]["picture"]+ " width=40px height=40px></img>"; 
+            list= "<li data=\"" +data[i]["fields"]["user"]+"\" data-name= \""+data[i]["fields"]["user"]+"\">"+img + view +"</li>"
+            div += "<div>"+list+"</div>"
+            $('#suggestion-box').html(div);}
+            }
+         else{
+            $('#suggestion-box').html("\n");
+         }
+        }, "json");
+    }
+    else{
+    $('#suggestion-box').html("\n");
+    
+    }
+  }
+  
+});
+
+</script>
+{% endblock %}

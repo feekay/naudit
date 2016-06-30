@@ -17,7 +17,7 @@ class UserForm(forms.ModelForm):
 #------------------------------------------------------------------------------#
 class MemberForm(forms.ModelForm):
 
-    picture = forms.FileField(widget=forms.FileInput(attrs={'required': '',}))
+    picture = forms.FileField(widget=forms.FileInput())
 
     class Meta:
         model =  Member

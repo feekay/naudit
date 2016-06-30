@@ -7,6 +7,8 @@ from django.db.models import Q
 from teams.forms import *
 from teams.models import Entry, Company
 
+import json
+from django.core import serializers
 # Create your views here.
 
 #------------------------------------------------------------------------------#
@@ -270,8 +272,38 @@ def login_view(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def settings(request):
     context_dic ={}
+    context_dic['user']= request.user.username
+    
+    status = handle_password_change(request)
+    context_dic['member_form'] = handle_member_change(request)
+    if status is None:
+        context_dic['password_form'] = SettingsForm()
+    elif status is True:
+        context_dic['password_form'] = SettingsForm()
+        context_dic['alert'] ="Password Successfully Changed"
+    else:
+        context_dic['password_form'] = SettingsForm()
+        context_dic['alert'] ="Password Change Attempt Failed"
+    
+    return render(request, "settings.html", context_dic)
+
+#------------------------------------------------------------------------------#
+def handle_member_change(request):
+    member_inst = Member.objects.get(user= request.user)
     if request.method == "POST":
-        #username = request.POST['username']
+        form = MemberForm(request.POST, instance=member_inst)
+        if form.is_valid():
+            member =form.save(commit=False)
+            member.save()
+            member = MemberForm(instance=member_inst)
+    else:
+        member = MemberForm(instance=member_inst)
+    return member
+#------------------------------------------------------------------------------#
+def handle_password_change(request):
+    if request.method == "POST" \
+    and 'old_password' in request.POST \
+    and 'new_password' in request.POST:
         old_password = request.POST['old_password']
         new_password = request.POST['new_password']
         user = authenticate(username = request.user.username, password = old_password)
@@ -280,15 +312,13 @@ def settings(request):
             if user.is_active:
                 user.set_password(new_password)
                 user.save()
-                context_dic['alert'] = 'Password change successful'
+                login(request, user)
+                return True
         else:
-            context_dic['alert'] = 'An error occured while changing password'  
+            return False  
         
     else:
-        context_dic['form'] = SettingsForm()
-        context_dic['alert'] =''
-    return render(request, "settings.html", context_dic)
-
+        return None
 #------------------------------------------------------------------------------#
 def get_entries(team="a"):
     if team =="a":
@@ -384,5 +414,104 @@ def add_entry(entry, member):
         else:
             emp.entries.add(entry)
             emp.save()
+################################################################################
+#  MESSAGING RELATED FUNCTIONS
+################################################################################
 
 #------------------------------------------------------------------------------#
+def messages(request):
+    return render(request,'messages.html' ,{})
+
+#------------------------------------------------------------------------------#
+def send_message(request):
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+        except Exception as inst:
+            print(inst)
+
+        message = data['message']
+        text = message
+        frm = request.user
+
+        try:
+            message = Message.objects.create(
+            time = datetime.now(),
+            text = text,
+            frm = frm,
+            )
+
+            mentions = data['mentions']
+
+            for user_id in mentions:
+                try:
+                    user=User.objects.get(id = user_id)
+                except:
+                    print("No such User")
+                else:
+                    message.to.add(user)
+                    message.save()
+                    print(message.to.all())
+
+            message.save()
+        except Exception as inst:
+            print(inst)
+            return HttpResponse(status=404)
+        #print("Create")
+        return HttpResponse(status=200)
+    return HttpResponse(status = 404)
+#------------------------------------------------------------------------------#
+def get_messages(request, limit= None):
+    try:
+        limit = int(limit)
+    except:
+        limit= 30
+
+    username = request.user
+    user = User.objects.get(username = username)
+    if user.is_superuser:
+        messages = Message.objects.all().order_by('time')
+        #data = serializers.serialize('json', messages)
+        #return HttpResponse(data, content_type='application/json')        
+    else:
+        messages = Message.objects.all().filter(Q(to = user)|Q(to=None)|Q(frm=user)).order_by('time')
+
+    if limit:
+        messages = messages[:limit]
+
+    try:
+        return render(request,'messages_body.html',{'messages': messages})
+    except:
+        return HttpResponse("Error in template")
+
+
+#------------------------------------------------------------------------------#
+def get_member_list(max_results =0, starts_with=""):
+    user_list = []
+    staff_list = []
+#    print("Searching for staff", starts_with)
+    if starts_with:
+        user_list = User.objects.filter(first_name__istartswith=starts_with)
+        for user in user_list:
+            staff_list.append(Member.objects.get(user = user))
+        print(staff_list)
+#    if max_results > 0:
+#        if staff_list.count() > max_results:
+#            staff_list = staff_list[:max_results]
+    print("Returning")
+    return staff_list
+#------------------------------------------------------------------------------#
+def suggest_member(request):
+
+    staff_list = []
+    starts_with = ''
+    if request.method == 'GET':
+        starts_with = request.GET['suggestion']
+        #print("Request Recieved", starts_with)
+
+    staff_list = get_member_list(4,starts_with)
+    #print("Response Ready")
+    data = serializers.serialize("json",staff_list)
+    #print( data)
+    return HttpResponse(data, content_type='application/json')

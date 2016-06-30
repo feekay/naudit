@@ -1,0 +1,9 @@
+<ul>
+{% for message in messages %}
+    {% if request.user == message.frm %} 
+    <li class= "text-right"><span>{{message.text}}</span></li>
+    {% else %}
+    <li class="text-left"><span>{{message.frm}}: </span> <span>{{message.text}}</span></li>
+    {% endif %}
+{% endfor %}
+</ul>
