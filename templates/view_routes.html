@@ -4,7 +4,12 @@
     <h1>Entries for company</h1>
                         <div>
                             {% for route in routes %}
-                                {{route.route_date}}
+                                <div class='route-card'>
+                                    <p>Date: {{route.route_date}}</p>
+                                    <p>Distance: {{route.distance}}</p>
+                                    <p>Expenses: {{route.expenses}}</p>
+                                    <img src='/media/{{route.route_image}}'></img>
+                                </div>
                             {% endfor %}
                         </div>
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>

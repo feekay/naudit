@@ -4,7 +4,10 @@
  <h1>Entries for company</h1>
                         <div>
                             {% for member in members %}
-                                {{member.user}}
+                               <div class='member-card'>
+                                 <p>Username: {{member.user}}</p>
+                                 <img src='/media/{{member.picture}}'> </img>
+                               </div> 
                             {% endfor %}
                         </div>
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>

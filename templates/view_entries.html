@@ -4,7 +4,18 @@
      <h1>Entries for company</h1>
                         <div>
                             {% for entry in entries %}
-                             <a href=/main/{{page}}/{{entry.id}} > {{entry.name}}</a>  
+                             <div class='entry-card'>
+                                <h4>
+                                  <a href=/main/{{page}}/{{entry.id}} > {{entry.name}}</a>
+                                <h4>
+                                <p>ID: {{entry.job_id}}<p>
+                                <p>Company: {{entry.company}}<p>
+                                <p>Address: {{entry.address}}<p>
+                                <p>Price: {{entry.price}}<p>
+                                <p>Start Date: {{entry.start_date}}<p>
+                                <p>Route Date: {{entry.route_date}}<p>
+                                <p>End Date: {{entry.end_date}}<p>
+                              </div>
                             {% endfor %}
                         </div>
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>

@@ -2,10 +2,16 @@
 
 {% block main %}
   <h1>Entries for company</h1>
-                        <div>
-                            <p>{{entry.name}}</p>
-                            <p>{{entry.visited}}</p>
-                            <p>{{entry.completed}}</p>
+                        <div class=''>
+                            <h2>{{entry.name}}</h2>
+                             <p>ID: {{entry.job_id}}<p>
+                             <p>Company: {{entry.company}}<p>
+                             <p>Address: {{entry.address}}<p>
+                             <p>Price: {{entry.price}}<p>
+                             <p>Start Date: {{entry.start_date}}<p>
+                             <p>Route Date: {{entry.route_date}}<p>
+                             <p>End Date: {{entry.end_date}}<p>
+                           <br><br>
                             {% if not entry.approved or not entry.cleared %}
                             <form action="" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}

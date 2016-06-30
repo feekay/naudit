@@ -4,14 +4,22 @@
 <h1>{{entry.route_date}}</h1>
                         <div>
                             <h2>{{entry.name}}</h2>
-                            <p>${{entry.price}}</p>
+                             <p>ID: {{entry.job_id}}<p>
+                             <p>Company: {{entry.company}}<p>
+                             <p>Address: {{entry.address}}<p>
+                             <p>Price: {{entry.price}}<p>
+                             <p>Start Date: {{entry.start_date}}<p>
+                             <p>Route Date: {{entry.route_date}}<p>
+                             <p>End Date: {{entry.end_date}}<p>
+                           <br><br>
+                            <h4>Description</h4>
                             <p>{{entry.description}}</p>
                             
                             {% if not entry.visited %}
                             <form action="" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 {{ form.as_p }}
-                                <input type=submit />
+                                <input type=submit value="Visited" />
                             </form>
                             
                             {% endif %}

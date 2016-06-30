@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <h1>Add an entry</h1>
+    <h1>Add Member</h1>
                             <form  enctype="multipart/form-data" method="post" action="" >
                                 {% csrf_token %}
                                 {{ form.as_p }}
