@@ -126,3 +126,10 @@ class Message(models.Model):
 
     def __unicode__(self):
         return str(self.text)
+#------------------------------------------------------------------------------#
+class Activity(models.Model):
+    user =  models.CharField(max_length = 10)
+    obj = models.CharField(max_length = 10, null=True)
+    action = models.CharField(max_length = 20)
+    time = models.DateTimeField(default = datetime.now)
+    

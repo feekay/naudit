@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block main %}
+    {% for activity in activites %}
+        {% if activity.obj %}
+       <p> {{ activity.user }} {{ activity.action }} {{activity.obj}} at {{activity.time}}</p>
+        {% else %}
+        <p> {{ activity.user }} {{ activity.action }} at {{activity.time}}</p>
+        {% endif %}
+    {% endfor %}
+{% endblock %}

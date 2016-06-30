@@ -73,6 +73,7 @@ def add_entry(request):
             entry.verified = verified
             entry.save()
             add_entry(entry, member)
+            log_activity(request, entry)
             return HttpResponseRedirect('/main/entries')
     else:
         form = EntryForm()
@@ -91,6 +92,7 @@ def edit_entry(request, entry_id):
         if form.is_valid():
             entry = form.save(commit=False)
             entry.save()
+            log_activity(request,entry, "Edited")
             return HttpResponseRedirect('/main/entries')
     else:
         form = EntryForm(instance = entry)
@@ -103,6 +105,7 @@ def add_company(request):
         form = CompanyForm(request.POST)
         if form.is_valid():
             company=form.save()
+            log_activity(request,company)
             return HttpResponseRedirect('/main/companies')
     else:
         form = CompanyForm()
@@ -123,9 +126,11 @@ def add_route(request):
             entries = Entry.objects.filter(route_date = route.route_date)
             if entries:
                 route.save()
+                log_activity(request,route)
                 for entry in entries:
                     entry.route = route
                     entry.save()
+                    log_activity(request,entry, "Route Added")
                 return HttpResponseRedirect('/main/routes')
             else:
                 form.add_error("route_date", "No entries on given date")
@@ -136,7 +141,24 @@ def add_route(request):
     return render(request, "add_route.html", {"form": form})
 
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
+def add_quiz(request):
+    return render(request, "add_quiz.html", {})
 
+#------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
+def quiz(request):
+    return render(request, "quiz.html", {})
+
+#------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
+def activity(request):
+    context_dic ={}
+    context_dic['activites'] = Activity.objects.all().order_by('time')
+    return render(request, "activity.html", context_dic)
+
+
+#------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
 def entry(request, entry_id, pending=False):
     context_dic = {}
@@ -158,9 +180,11 @@ def entry(request, entry_id, pending=False):
             print "Post", user_type
             if user_type == "b":
                 entry.approved = True
+                log_activity(request,entry,"Approved")
                 entry.save()
             if user_type == "c":
                 entry.cleared = True
+                log_activity(request,"Accepted")
                 entry.save()
             if user_type =="s":
                 entry.finalized = True
@@ -246,6 +270,7 @@ def emp_entries(request):
 #------------------------------------------------------------------------------#
 
 def logout_view(request):
+    log_activity(request,None, "Logged out")
     logout(request)
     return HttpResponseRedirect('/main/login')
 
@@ -259,6 +284,7 @@ def login_view(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
+                log_activity(request,action= "Logged in")
                 return HttpResponseRedirect('/main')
             else:
                 return HttpResponse("Account has been deactivated")
@@ -275,16 +301,18 @@ def settings(request):
     context_dic['user']= request.user.username
     
     status = handle_password_change(request)
-    context_dic['member_form'] = handle_member_change(request)
+    
     if status is None:
         context_dic['password_form'] = SettingsForm()
     elif status is True:
         context_dic['password_form'] = SettingsForm()
         context_dic['alert'] ="Password Successfully Changed"
+        log_activity(request,action= "Password Changed")
     else:
         context_dic['password_form'] = SettingsForm()
         context_dic['alert'] ="Password Change Attempt Failed"
-    
+    context_dic['member_form'] = handle_member_change(request)
+
     return render(request, "settings.html", context_dic)
 
 #------------------------------------------------------------------------------#
@@ -295,10 +323,11 @@ def handle_member_change(request):
         if form.is_valid():
             member =form.save(commit=False)
             member.save()
-            member = MemberForm(instance=member_inst)
+            log_activity(request,action="Info updated")
+            form = MemberForm(instance=member_inst)
     else:
-        member = MemberForm(instance=member_inst)
-    return member
+        form = MemberForm(instance=member_inst)
+    return form
 #------------------------------------------------------------------------------#
 def handle_password_change(request):
     if request.method == "POST" \
@@ -419,10 +448,12 @@ def add_entry(entry, member):
 ################################################################################
 
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
 def messages(request):
     return render(request,'messages.html' ,{})
 
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
 def send_message(request):
 
     if request.method == "POST":
@@ -462,6 +493,7 @@ def send_message(request):
         return HttpResponse(status=200)
     return HttpResponse(status = 404)
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
 def get_messages(request, limit= None):
     try:
         limit = int(limit)
@@ -487,6 +519,7 @@ def get_messages(request, limit= None):
 
 
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
 def get_member_list(max_results =0, starts_with=""):
     user_list = []
     staff_list = []
@@ -502,6 +535,7 @@ def get_member_list(max_results =0, starts_with=""):
     print("Returning")
     return staff_list
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
 def suggest_member(request):
 
     staff_list = []
@@ -515,3 +549,10 @@ def suggest_member(request):
     data = serializers.serialize("json",staff_list)
     #print( data)
     return HttpResponse(data, content_type='application/json')
+#------------------------------------------------------------------------------#
+def log_activity(request, obj=None, action="Created"):
+    if obj:
+        activity = Activity.objects.create(user= request.user.username, obj= str(obj), action=action)
+    else:
+        activity = Activity.objects.create(user= request.user.username, action=action)
+    activity.save()

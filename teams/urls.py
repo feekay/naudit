@@ -39,4 +39,7 @@ urlpatterns = [
     url(r'^messages/get/$', views.get_messages),
     url(r'^messages/send/$', views.send_message),
     url(r'^messages/$', views.messages),
+    url(r'^activity/$', views.activity),
+    url(r'^quiz/$', views.quiz),
+    url(r'^add_quiz/$', views.add_quiz)
 ]
