@@ -37,7 +37,7 @@ class Route(models.Model):
     expenses = models.IntegerField()
 
     def __unicode__(self):
-        return str(self.route_date) +" "+ self.distance
+        return str(self.route_date) +" "+ str(self.distance)
 
 #------------------------------------------------------------------------------#
 class Entry(models.Model):
@@ -50,6 +50,8 @@ class Entry(models.Model):
     end_date = models.DateField()
     route_date = models.DateField()
     description = models.TextField(max_length=1500)
+    teamb_desc = models.TextField(max_length=1500, null=True)
+    teamc_desc = models.TextField(max_length=1500, null= True)
     owner = models.ForeignKey(Member, null= False)
     route = models.ForeignKey(Route, null=True)
 
@@ -57,7 +59,8 @@ class Entry(models.Model):
     visited = models.BooleanField(default=False)    #Team B marks after getting it done
     cleared = models.BooleanField(default=False)    #Team C verfies B's work
     completed = models.BooleanField(default=False)  #C marks this after performing their job
-    finalized = models.BooleanField(default=False)  #Admin performs this
+    verified = models.BooleanField(default=False)   #Admin verifies C's work
+    finalized = models.BooleanField(default=False)  #Admin performs this at the end
     finalize_date = models.DateField(null=True)
 
     def save(self, *args, **kwargs):
@@ -65,7 +68,7 @@ class Entry(models.Model):
         super(Entry, self).save(*args, **kwargs)
         
     def __unicode__(self):
-        return str(self.company)+str(self.job_id)+str(self.name)
+        return str(self.company) + str(self.job_id) + str(self.name)
 
     class Meta:
         unique_together =(("company", "job_id"))

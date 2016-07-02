@@ -15,14 +15,29 @@
                             <h4>Description</h4>
                             <p>{{entry.description}}</p>
                             
-                            {% if not entry.visited %}
+                            
                             <form action="" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                {{ form.as_p }}
+                                {% for field in form %}
+                                  {% if field.name == "photos" %}
+                                    <p>
+                                    {% for checkbox in form.photos %}
+                                       <label class="img_radio" for="{{ checkbox.id_for_label }}">
+                                       {{ checkbox.tag }}
+                                       <img src="media/{{checkbox.choice_label}}"} />
+                                       <span>{{checkbox.choice_value}}<span>
+                                       </label>
+                                    {% endfor %}
+                                    </p>
+                                   {% else %}
+                                     {{ field.label }}
+                                     {{ field}}
+
+                                   {% endif %}
+                                {% endfor %}
                                 <input type=submit value="Visited" />
                             </form>
                             
-                            {% endif %}
                         </div>
                                        
 {% endblock %}

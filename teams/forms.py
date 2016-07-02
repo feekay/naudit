@@ -75,6 +75,7 @@ class RouteForm(forms.ModelForm):
 #------------------------------------------------------------------------------#
 class MyForm(forms.Form):
     file = MultiFileField(min_num=0, max_num=5, max_file_size=1024*1024*5, required = False)
+    desc = forms.CharField(required= False, max_length = 1500, widget=forms.Textarea())
 
 #------------------------------------------------------------------------------#
 class SettingsForm(forms.Form):
@@ -137,5 +138,17 @@ class EntryForm(forms.ModelForm):
 #------------------------------------------------------------------------------#
     class Meta:
         model = Entry
-        exclude = ["owner", "route", "approved", "visited", "cleared","completed", "finalized", "finalize_date"]
+        exclude = ["owner", "route", "approved", "visited", "cleared","completed", "finalized", "finalize_date", "teamb_desc","teamc_desc"]
 
+#------------------------------------------------------------------------------#
+
+class CForm(forms.Form):
+    desc = forms.CharField(required= True, max_length = 1500, widget=forms.Textarea(attrs={'required': ''}))
+    photos = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple())
+    
+    def __init__(self, entry, *args, **kwargs):
+        super(CForm, self).__init__(*args, **kwargs)
+
+        options = [(attachment.key, attachment.item.name) for attachment in entry.attachment_set.all()]
+        self.fields['photos'].choices= options
+        self.fields['photos'].initial = [attachment.key for attachment in entry.attachment_set.all() if attachment.used]

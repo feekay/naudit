@@ -12,7 +12,7 @@
                              <p>Route Date: {{entry.route_date}}<p>
                              <p>End Date: {{entry.end_date}}<p>
                            <br><br>
-                            {% if not entry.approved or not entry.cleared %}
+                            {% if not entry.approved or not entry.cleared or not entry.verified %}
                             <form action="" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <input type=submit />

@@ -180,14 +180,16 @@ def entry(request, entry_id, pending=False):
             print "Post", user_type
             if user_type == "b":
                 entry.approved = True
-                log_activity(request,entry,"Approved")
+                log_activity(request, entry,"Approved")
                 entry.save()
             if user_type == "c":
                 entry.cleared = True
-                log_activity(request,"Accepted")
+                log_activity(request, entry, "Accepted")
                 entry.save()
             if user_type =="s":
-                entry.finalized = True
+                entry.verified = True
+                log_activity(request, entry, "Verified")
+                entry.save()
 
         return render(request, 'pending_entry.html', context_dic)     
     else:     
@@ -195,7 +197,7 @@ def entry(request, entry_id, pending=False):
             form  = teamb_entry(request, entry)
             context_dic["form"] = form
         elif user_type=="c":
-            form = teamc_entry(request)
+            form = teamc_entry(request, entry)
             context_dic["form"] = form
         else:
             return render(request, "view_entry.html", context_dic)
@@ -355,7 +357,7 @@ def get_entries(team="a"):
     elif team =="b":
         return Entry.objects.filter(approved = True, completed = False)
     elif team =="c":
-        return Entry.objects.filter(visited = True, cleared = True, finalized = False)
+        return Entry.objects.filter(visited = True, cleared = True, verified = False)
     #Super User
     elif team =="s":
         return Entry.objects.all()
@@ -364,12 +366,12 @@ def get_entries(team="a"):
 
 def get_pending(team="b"):
     if team =="b":
-        return Entry.objects.filter(approved = False, visited = False)
+        return Entry.objects.filter(approved = False)
     elif team =="c":
-        return Entry.objects.filter(visited = True, cleared = False, completed = False)
+        return Entry.objects.filter(visited = True, cleared = False)
     #Super User
     elif team =="s":
-        return Entry.objects.filter(completed = True, finalized= False)
+        return Entry.objects.filter(completed = True, verified= False)
 
 #------------------------------------------------------------------------------#
 def get_employee_type(member):
@@ -402,9 +404,8 @@ def get_member_type(user):
 #------------------------------------------------------------------------------#        
     
 def teamb_entry(request, entry):
-
     try:
-        member = Member.objects.get(user=user)
+        member = Member.objects.get(user=request.user)
     except:
         return None
     #Check employee type and set the value of clear
@@ -413,7 +414,7 @@ def teamb_entry(request, entry):
         cleared = True
     else:
         cleared = False
-
+    
     if request.method == "POST":
         form = MyForm(request.POST, request.FILES)
         if form.is_valid():
@@ -421,17 +422,65 @@ def teamb_entry(request, entry):
                 Attachment.objects.create(entry=entry, item=f)
             entry.visited = True
             entry.cleared = cleared
+            #If description proveided include description
+            if 'desc' in request.POST:
+                entry.teamb_desc = form.cleaned_data['desc']
+
             entry.save()
-            #Attach entry entry to member
+            
+            #Attach entry 'entry' to member
+            log_activity(request,entry, action="Edited"))
             add_entry(entry, member)
             return None
+    
     else:
-        form = MyForm()
+
+        if entry.teamb_desc:
+            desc = entry.teamb_desc
+        else:
+            desc = ""
+        form = MyForm(initial={'desc': desc})
     return form
 
 #------------------------------------------------------------------------------#
-def teamc_entry(request):
-    pass
+def teamc_entry(request, entry):
+    try:
+        member = Member.objects.get(user=request.user)
+    except:
+        return None
+    #Check employee type and set the value of verified
+    employee = get_employee_type(member)
+
+    if employee == "sal":
+        verified = True
+    else:
+        verified = False
+
+    if request.method=="POST":
+        form = CForm(entry, request.POST)
+        if form.is_valid():
+            #ADD Photo check handling
+            
+            entry.teamc_desc = form.cleaned_data['desc']
+            entry.completed = True
+            entry.save()
+            log_activity(request, entry, action="Edited")
+            add_entry(entry, member)
+
+            for key in form.cleaned_data['photos']:
+                attachment = Attachment.objects.get(key=key)
+                attachment.used= True
+                attachment.save()
+        else:
+            print form.errors    
+            
+    if entry.teamc_desc:
+        desc = entry.teamc_desc
+    else:
+        desc =''
+    form = CForm(entry, initial={'desc': desc})
+    
+    return form
 
 #------------------------------------------------------------------------------#
 def add_entry(entry, member):

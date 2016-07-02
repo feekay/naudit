@@ -25,6 +25,38 @@
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+
+    <style>
+        input[type=checkbox] {
+             display:none;
+        }
+
+        input[type=checkbox] + label {
+            background: #999;
+            height: 16px;
+            width: 16px;
+            display:inline-block;
+            padding: 0 0 0 0px;
+        }
+
+        input[type=checkbox]:checked + label {
+            background: #0080FF;
+            height: 16px;
+            width: 16px;
+            display:inline-block;
+            padding: 0 0 0 0px;
+        }
+        .img_radio> input{ /* HIDE RADIO */
+            display:none;
+        }
+        .img_radio > input + img{ /* IMAGE STYLES */
+            cursor:pointer;
+            border:2px solid transparent;
+        }
+        .img_radio > input:checked + img{ /* (CHECKED) IMAGE STYLES */
+            border:2px solid #00f;
+        }
+    </style>
 </head>
 
 <body>
