@@ -429,7 +429,7 @@ def teamb_entry(request, entry):
             entry.save()
             
             #Attach entry 'entry' to member
-            log_activity(request,entry, action="Edited"))
+            log_activity(request,entry, action="Edited")
             add_entry(entry, member)
             return None
     
