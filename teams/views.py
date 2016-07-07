@@ -56,6 +56,9 @@ def add_member(request):
 
 @user_passes_test(lambda u: u.is_authenticated)
 def create_entry(request):
+    context_dic ={}
+    if not request.user.is_superuser:
+        context_dic["user_type"]= get_member_type(request.user)
     if request.method == "POST":
         form = EntryForm(request.POST)
 
@@ -76,12 +79,15 @@ def create_entry(request):
             log_activity(request, entry)
             return HttpResponseRedirect('/main/entries')
     else:
-        form = EntryForm()
-    return render(request, "add_entry.html", {"form": form})
+        context_dic['form'] = EntryForm()
+    return render(request, "add_entry.html",context_dic)
 
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
 def edit_entry(request, entry_id):
+    context_dic ={}
+    if not request.user.is_superuser:
+        context_dic["user_type"]= get_member_type(request.user)
     try:
         entry = Entry.objects.get(id= entry_id)
     except:
@@ -95,12 +101,13 @@ def edit_entry(request, entry_id):
             log_activity(request,entry, "Edited")
             return HttpResponseRedirect('/main/entries')
     else:
-        form = EntryForm(instance = entry)
-    return render(request, "add_entry.html", {"form": form})
+        context_dic['form'] = EntryForm(instance = entry)
+    return render(request, "add_entry.html", context_dic)
 
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_superuser)
 def add_company(request):
+    
     if request.method == "POST":
         form = CompanyForm(request.POST)
         if form.is_valid():
@@ -108,13 +115,15 @@ def add_company(request):
             log_activity(request,company)
             return HttpResponseRedirect('/main/companies')
     else:
-        form = CompanyForm()
-    return render(request, "add_company.html", {"form": form})
+        context_dic['form'] = CompanyForm()
+    return render(request, "add_company.html", context_dic)
 
 #------------------------------------------------------------------------------#
 
 @user_passes_test(lambda u: u.is_authenticated)
 def add_route(request):
+    context_dic={}
+    context_dic["user_type"]= 'a'
     if request.method == "POST":
         form = RouteForm(request.POST, request.FILES)
 
@@ -137,8 +146,8 @@ def add_route(request):
                 return render(request, "add_route.html", {"form": form})
 
     else:
-        form = RouteForm()
-    return render(request, "add_route.html", {"form": form})
+        context_dic['form'] = RouteForm()
+    return render(request, "add_route.html", context_dic)
 
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
@@ -162,7 +171,8 @@ def activity(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def entry(request, entry_id, pending=False):
     context_dic = {}
-
+    if not request.user.is_superuser:
+        context_dic["user_type"]= get_member_type(request.user)
     try:
         entry = Entry.objects.get(id=entry_id)
         context_dic["entry"] = entry
@@ -209,6 +219,8 @@ def entry(request, entry_id, pending=False):
 @user_passes_test(lambda u: u.is_authenticated)
 def entries_view(request):
     context_dic = {}
+    if not request.user.is_superuser:
+        context_dic["user_type"]= get_member_type(request.user)
     user_type = get_member_type(request.user)
 
     context_dic["entries"]=get_entries(team = user_type)
@@ -219,7 +231,7 @@ def entries_view(request):
 
 #------------------------------------------------------------------------------#
 
-@user_passes_test(lambda u: u.is_authenticated)
+@user_passes_test(lambda u: u.is_superuser)
 def companies_view(request):
     context_dic = {}
     context_dic["companies"]=Company.objects.all()
@@ -227,7 +239,7 @@ def companies_view(request):
 
 #------------------------------------------------------------------------------#
 
-@user_passes_test(lambda u: u.is_authenticated)
+@user_passes_test(lambda u: u.is_superuser)
 def members_view(request):
     context_dic = {}
     context_dic["members"]=Member.objects.all()
@@ -238,6 +250,8 @@ def members_view(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def routes_view(request):
     context_dic = {}
+    if not request.user.is_superuser:
+        context_dic["user_type"]= get_member_type(request.user)
     context_dic["routes"]=Route.objects.all()
     return render(request, "view_routes.html", context_dic)
 
@@ -245,6 +259,8 @@ def routes_view(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def pending_view(request):
     context_dic = {}
+    if not request.user.is_superuser:
+        context_dic["user_type"]= get_member_type(request.user)
 
     user_type = get_member_type(request.user)
 
@@ -300,6 +316,8 @@ def login_view(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def settings(request):
     context_dic ={}
+    if not request.user.is_superuser:
+        context_dic["user_type"]= get_member_type(request.user)
     context_dic['user']= request.user.username
     
     status = handle_password_change(request)
@@ -499,7 +517,10 @@ def add_entry(entry, member):
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
 def messages(request):
-    return render(request,'messages.html' ,{})
+    context_dic ={}
+    if not request.user.is_superuser:
+        context_dic["user_type"]= get_member_type(request.user)
+    return render(request,'messages.html' ,context_dic)
 
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
