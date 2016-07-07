@@ -10,3 +10,33 @@
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
                                         
 {% endblock %}
+{% block script %}
+    <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function() {
+        $('.datepicker').datepicker();
+        });
+        
+        $(function() {
+        $( "#id_start_date, #id_end_date, #id_route_date" ).datepicker({
+        defaultDate: "+1w",
+        changeMonth: true,
+        numberOfMonths: 3,
+        onSelect: function( selectedDate ) {
+            if(this.id == 'start'){
+              var dateMin = $('#id_start_date').datepicker("getDate");
+
+              var rMin = new Date(dateMin.getFullYear(), dateMin.getMonth(),dateMin.getDate() + 1); 
+              $('#id_end_date').datepicker("option","minDate",rMin);
+
+              var dateMax = $('#end').datepicker("getDate");              
+              var rMax = new Date(dateMax.getFullYear(), dateMax.getMonth(),dateMax.getDate());
+              $('#id_route_date').datepicker("option","minDate",rMin);
+              $('#id_route_date').datepicker("option","maxDate",rMax);           
+            }
+
+        }
+    });
+});
+    </script>
+{% endblock %}

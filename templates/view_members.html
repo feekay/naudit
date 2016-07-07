@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 
 {% block main %}
- <h1>Entries for company</h1>
+ <h1>Members</h1>
                         <div>
                             {% for member in members %}
                                <div class='member-card'>
                                  <p>Username: {{member.user}}</p>
-                                 <img src='/media/{{member.picture}}'> </img>
+                                 <p>Type{{member.type}}<p>
+                                 <img src='/media/{{member.picture}}' height='200px' width='200px'> </img>
                                </div> 
                             {% endfor %}
                         </div>

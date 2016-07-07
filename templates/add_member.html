@@ -12,3 +12,11 @@
                         <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
                                         
 {% endblock %}
+{% block script %}
+    <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function() {
+        $('.datepicker').datepicker();
+        });
+    </script>   
+{% endblock %}

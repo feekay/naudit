@@ -4,6 +4,11 @@ from django.contrib.auth.models import User
 from multiupload.fields import MultiFileField
 from django.forms.extras.widgets import SelectDateWidget
 
+#Customizing dateinput
+from functools import partial
+DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+
+
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'required': '', 'autocomplete':'off'}))
     first_name = forms.CharField(max_length = 50, widget=forms.TextInput(attrs={'required': ''}))
@@ -18,7 +23,7 @@ class UserForm(forms.ModelForm):
 class MemberForm(forms.ModelForm):
 
     picture = forms.FileField(widget=forms.FileInput())
-
+    birth_date = forms.DateField(widget=DateInput())
     class Meta:
         model =  Member
         exclude = ['user']
@@ -57,7 +62,7 @@ class CompanyForm(forms.ModelForm):
 
 #------------------------------------------------------------------------------#
 class RouteForm(forms.ModelForm):
-
+    route_date =forms.DateField(widget=DateInput())
 #Validation implemented in view directly
 #    def clean_route_date(self):
 #        data = self.cleaned_data['route_date']
@@ -84,7 +89,9 @@ class SettingsForm(forms.Form):
 
 #------------------------------------------------------------------------------#
 class EntryForm(forms.ModelForm):
-
+    start_date = forms.DateField(widget=DateInput())
+    end_date = forms.DateField(widget=DateInput())
+    route_date = forms.DateField(widget=DateInput())
     def clean_job_id(self):
     
         """

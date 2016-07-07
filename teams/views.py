@@ -55,7 +55,7 @@ def add_member(request):
 #------------------------------------------------------------------------------#
 
 @user_passes_test(lambda u: u.is_authenticated)
-def add_entry(request):
+def create_entry(request):
     if request.method == "POST":
         form = EntryForm(request.POST)
 

@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'^add_company/$', views.add_company),
     url(r'^add_member/$', views.add_member),
     url(r'^add_route/$', views.add_route),
-    url(r'^add_entry/$', views.add_entry),
+    url(r'^add_entry/$', views.create_entry),
     url(r'^settings/$', views.settings),
     url(r'^suggest_member/$', views.suggest_member),
     url(r'^messages/get/$', views.get_messages),
