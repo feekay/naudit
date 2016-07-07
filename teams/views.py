@@ -337,7 +337,10 @@ def settings(request):
 
 #------------------------------------------------------------------------------#
 def handle_member_change(request):
-    member_inst = Member.objects.get(user= request.user)
+    try:
+        member_inst = Member.objects.get(user= request.user)
+    except:
+        return None
     if request.method == "POST":
         form = MemberForm(request.POST, instance=member_inst)
         if form.is_valid():
