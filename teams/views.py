@@ -331,16 +331,17 @@ def settings(request):
     else:
         context_dic['password_form'] = SettingsForm()
         context_dic['alert'] ="Password Change Attempt Failed"
-    try:
+    if not request.user.is_superuser:
         context_dic['member_form'] = handle_member_change(request)
-    except:
-        pass
+
     return render(request, "settings.html", context_dic)
 
 #------------------------------------------------------------------------------#
 def handle_member_change(request):
-
-    member_inst = Member.objects.get(user= request.user)
+    try:
+        member_inst = Member.objects.get(user= request.user)
+    except Member.DoesNotExist:
+        return None
     if request.method == "POST":
         form = MemberForm(request.POST, instance=member_inst)
         if form.is_valid():
