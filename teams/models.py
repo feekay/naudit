@@ -96,7 +96,7 @@ class Attachment(models.Model):
     used = models.BooleanField(default=False)
     
     def __unicode__(self):
-        return str(self.entry) +"  "+ self.used
+        return str(self.entry) +"  "+ str(self.used)
 #------------------------------------------------------------------------------#    
 class Salary_based(models.Model):
     details = models.OneToOneField(Member)

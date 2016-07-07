@@ -331,16 +331,16 @@ def settings(request):
     else:
         context_dic['password_form'] = SettingsForm()
         context_dic['alert'] ="Password Change Attempt Failed"
-    context_dic['member_form'] = handle_member_change(request)
-
+    try:
+        context_dic['member_form'] = handle_member_change(request)
+    except:
+        pass
     return render(request, "settings.html", context_dic)
 
 #------------------------------------------------------------------------------#
 def handle_member_change(request):
-    try:
-        member_inst = Member.objects.get(user= request.user)
-    except:
-        return None
+
+    member_inst = Member.objects.get(user= request.user)
     if request.method == "POST":
         form = MemberForm(request.POST, instance=member_inst)
         if form.is_valid():
