@@ -41,7 +41,6 @@ class Route(models.Model):
 
 #------------------------------------------------------------------------------#
 class Entry(models.Model):
-    name = models.CharField(max_length=20)
     company = models.ForeignKey(Company ,null=False)
     job_id = models.IntegerField()
     address = models.CharField(max_length =150)
@@ -68,7 +67,7 @@ class Entry(models.Model):
         super(Entry, self).save(*args, **kwargs)
         
     def __unicode__(self):
-        return str(self.company) + str(self.job_id) + str(self.name)
+        return str(self.company) + str(self.job_id)
 
     class Meta:
         unique_together =(("company", "job_id"))

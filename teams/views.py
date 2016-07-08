@@ -11,12 +11,12 @@ import json
 from django.core import serializers
 # Create your views here.
 
+
 #------------------------------------------------------------------------------#
 
 @user_passes_test(lambda u: u.is_authenticated)
 def home(request):
-    context_dic ={}
-    context_dic["user_type"]= get_member_type(request.user)
+    context_dic={}
     return render(request, "index.html", context_dic)
 
 #------------------------------------------------------------------------------#
@@ -56,9 +56,7 @@ def add_member(request):
 
 @user_passes_test(lambda u: u.is_authenticated)
 def create_entry(request):
-    context_dic ={}
-    if not request.user.is_superuser:
-        context_dic["user_type"]= get_member_type(request.user)
+    context_dic={}
     if request.method == "POST":
         form = EntryForm(request.POST)
 
@@ -86,8 +84,6 @@ def create_entry(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def edit_entry(request, entry_id):
     context_dic ={}
-    if not request.user.is_superuser:
-        context_dic["user_type"]= get_member_type(request.user)
     try:
         entry = Entry.objects.get(id= entry_id)
     except:
@@ -107,7 +103,7 @@ def edit_entry(request, entry_id):
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_superuser)
 def add_company(request):
-    
+    context_dic={}
     if request.method == "POST":
         form = CompanyForm(request.POST)
         if form.is_valid():
@@ -123,7 +119,6 @@ def add_company(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def add_route(request):
     context_dic={}
-    context_dic["user_type"]= 'a'
     if request.method == "POST":
         form = RouteForm(request.POST, request.FILES)
 
@@ -144,7 +139,8 @@ def add_route(request):
             else:
                 form.add_error("route_date", "No entries on given date")
                 return render(request, "add_route.html", {"form": form})
-
+        else:
+            context_dic['form'] = form
     else:
         context_dic['form'] = RouteForm()
     return render(request, "add_route.html", context_dic)
@@ -152,7 +148,8 @@ def add_route(request):
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
 def add_quiz(request):
-    return render(request, "add_quiz.html", {})
+    context_dic={}
+    return render(request, "add_quiz.html", context_dic)
 
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
@@ -171,8 +168,6 @@ def activity(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def entry(request, entry_id, pending=False):
     context_dic = {}
-    if not request.user.is_superuser:
-        context_dic["user_type"]= get_member_type(request.user)
     try:
         entry = Entry.objects.get(id=entry_id)
         context_dic["entry"] = entry
@@ -219,8 +214,6 @@ def entry(request, entry_id, pending=False):
 @user_passes_test(lambda u: u.is_authenticated)
 def entries_view(request):
     context_dic = {}
-    if not request.user.is_superuser:
-        context_dic["user_type"]= get_member_type(request.user)
     user_type = get_member_type(request.user)
 
     context_dic["entries"]=get_entries(team = user_type)
@@ -250,8 +243,6 @@ def members_view(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def routes_view(request):
     context_dic = {}
-    if not request.user.is_superuser:
-        context_dic["user_type"]= get_member_type(request.user)
     context_dic["routes"]=Route.objects.all()
     return render(request, "view_routes.html", context_dic)
 
@@ -259,9 +250,7 @@ def routes_view(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def pending_view(request):
     context_dic = {}
-    if not request.user.is_superuser:
-        context_dic["user_type"]= get_member_type(request.user)
-
+    
     user_type = get_member_type(request.user)
 
     context_dic["entries"]=get_pending(team = user_type)
@@ -316,9 +305,7 @@ def login_view(request):
 @user_passes_test(lambda u: u.is_authenticated)
 def settings(request):
     context_dic ={}
-    if not request.user.is_superuser:
-        context_dic["user_type"]= get_member_type(request.user)
-    context_dic['user']= request.user.username
+    context_dic['c_user']= request.user.username
     
     status = handle_password_change(request)
     

@@ -15,7 +15,7 @@
                             <h4>Description</h4>
                             <p>{{entry.description}}</p>
                             
-                            
+                            {% if form %}
                             <form action="" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 {% for field in form %}
@@ -35,8 +35,9 @@
 
                                    {% endif %}
                                 {% endfor %}
-                                <input type=submit value="Visited" />
+                                <input type=submit value="Done" />
                             </form>
+                            {% endif %}
                             
                         </div>
                                        

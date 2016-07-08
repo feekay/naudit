@@ -145,7 +145,7 @@ class EntryForm(forms.ModelForm):
 #------------------------------------------------------------------------------#
     class Meta:
         model = Entry
-        exclude = ["owner", "route", "approved", "visited", "cleared","completed", "finalized", "finalize_date", "teamb_desc","teamc_desc"]
+        exclude = ["owner", "route", "approved", "visited", "cleared","completed", "verified","finalized", "finalize_date", "teamb_desc","teamc_desc"]
 
 #------------------------------------------------------------------------------#
 
