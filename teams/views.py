@@ -64,9 +64,9 @@ def create_entry(request):
         #Get the type of member and set the verified status
         emp_type = get_employee_type(member)
         if emp_type == "sal":
-            verified = True
+            approved = True
         else:
-            verified = False
+            approved = False
 
         if form.is_valid():
             entry = form.save(commit=False)
@@ -195,7 +195,7 @@ def entry(request, entry_id, pending=False):
                 entry.verified = True
                 log_activity(request, entry, "Verified")
                 entry.save()
-
+            return HttpResponseRedirect('/main/entries')
         return render(request, 'pending_entry.html', context_dic)     
     else:     
         if user_type=="b":
@@ -282,6 +282,7 @@ def logout_view(request):
     return HttpResponseRedirect('/main/login')
 
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
 def login_view(request):
     if request.method == "POST":
         username = request.POST['username']
