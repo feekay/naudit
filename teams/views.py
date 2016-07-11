@@ -71,7 +71,7 @@ def create_entry(request):
         if form.is_valid():
             entry = form.save(commit=False)
             entry.owner = member
-            entry.verified = verified
+            entry.approved = approved
             entry.save()
             add_entry(entry, member)
             log_activity(request, entry)
@@ -181,22 +181,7 @@ def entry(request, entry_id, pending=False):
     #If the pending page is open send approval form
     #Otherwise send forms to add attachments or approve attachment
     if pending:
-        if request.method=="POST":
-            print "Post", user_type
-            if user_type == "b":
-                entry.approved = True
-                log_activity(request, entry,"Approved")
-                entry.save()
-            if user_type == "c":
-                entry.cleared = True
-                log_activity(request, entry, "Accepted")
-                entry.save()
-            if user_type =="s":
-                entry.verified = True
-                log_activity(request, entry, "Verified")
-                entry.save()
-            return HttpResponseRedirect('/main/entries')
-        return render(request, 'pending_entry.html', context_dic)     
+        handle_pending(request, user_type)
     else:     
         if user_type=="b":
             form  = teamb_entry(request, entry)
@@ -245,7 +230,16 @@ def routes_view(request):
     context_dic = {}
     context_dic["routes"]=Route.objects.all()
     return render(request, "view_routes.html", context_dic)
+#------------------------------------------------------------------------------#
 
+@user_passes_test(lambda u: u.is_authenticated)
+def route_view(request, route_id):
+    context_dic = {}
+    route = Route.objects.get(id= route_id)
+    context_dic["route"]= route
+    context_dic["entries"]= route.entry_set.all()
+    print route.entry_set.count()
+    return render(request, "view_route.html", context_dic)
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
 def pending_view(request):
@@ -275,7 +269,25 @@ def emp_entries(request):
 
     return render(request, 'count.html', context_dic)
 #------------------------------------------------------------------------------#
+def handle_pending(request, user_type):
+    if request.method=="POST":
+    #    print "Post", user_type
+        if user_type == "b":
+            entry.approved = True
+            log_activity(request, entry,"Approved")
+            entry.save()
+        if user_type == "c":
+            entry.cleared = True
+            log_activity(request, entry, "Accepted")
+            entry.save()
+        if user_type =="s":
+            entry.verified = True
+            log_activity(request, entry, "Verified")
+            entry.save()
+        return HttpResponseRedirect('/main/entries')
+    return render(request, 'pending_entry.html', context_dic)
 
+#------------------------------------------------------------------------------#
 def logout_view(request):
     log_activity(request,None, "Logged out")
     logout(request)

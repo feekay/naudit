@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^companies/$', views.companies_view),
     url(r'^members/$', views.members_view),
     url(r'^routes/$', views.routes_view),
+    url(r'^routes/(?P<route_id>[\d]+)/$', views.route_view),
     url(r'^pending/$', views.pending_view),
     url(r'^add_company/$', views.add_company),
     url(r'^add_member/$', views.add_member),

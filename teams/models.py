@@ -102,7 +102,7 @@ class Salary_based(models.Model):
     salary = models.IntegerField()
 
     def __unicode__(self):
-        return str(self.details) +" "+ self.salary
+        return str(self.details) +" "+ str(self.salary)
 #------------------------------------------------------------------------------#
 class Entry_based(models.Model):
     details = models.OneToOneField(Member)
@@ -116,7 +116,7 @@ class Entry_based(models.Model):
         pass
 
     def __unicode__(self):
-        return str(self.details) +" "+ self.rate
+        return str(self.details) +" "+ str(self.rate)
 
 
 #------------------------------------------------------------------------------#

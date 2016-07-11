@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <h1>Entries for company</h1>
+    <h1>Routes</h1>
                         <div>
                             {% for route in routes %}
                                 <div class='route-card'>
-                                    <p>Date: {{route.route_date}}</p>
+                                    
+                                    <a href="/main/routes/{{route.id}}" >Date: {{route.route_date}}</a>
                                     <p>Distance: {{route.distance}}</p>
                                     <p>Expenses: {{route.expenses}}</p>
                                     <img src='/media/{{route.route_image}}'></img>
