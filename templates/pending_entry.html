@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block main %}
-  <h1>Entries for company</h1>
+  <h1>Pending</h1>
                         <div class=''>
                             <h2>{{entry.name}}</h2>
                              <p>ID: {{entry.job_id}}<p>
@@ -15,7 +15,7 @@
                             {% if not entry.approved or not entry.cleared or not entry.verified %}
                             <form action="" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                <input type=submit />
+                                <input type=submit value="Approve" />
                             </form>
                             {% endif %}
                         </div>

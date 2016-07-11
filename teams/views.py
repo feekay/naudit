@@ -181,7 +181,7 @@ def entry(request, entry_id, pending=False):
     #If the pending page is open send approval form
     #Otherwise send forms to add attachments or approve attachment
     if pending:
-        handle_pending(request, user_type)
+        return handle_pending(request, entry, user_type, context_dic)
     else:     
         if user_type=="b":
             form  = teamb_entry(request, entry)
@@ -238,7 +238,7 @@ def route_view(request, route_id):
     route = Route.objects.get(id= route_id)
     context_dic["route"]= route
     context_dic["entries"]= route.entry_set.all()
-    print route.entry_set.count()
+    #print route.entry_set.count()
     return render(request, "view_route.html", context_dic)
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
@@ -269,7 +269,7 @@ def emp_entries(request):
 
     return render(request, 'count.html', context_dic)
 #------------------------------------------------------------------------------#
-def handle_pending(request, user_type):
+def handle_pending(request, entry, user_type, context_dic):
     if request.method=="POST":
     #    print "Post", user_type
         if user_type == "b":
@@ -494,8 +494,8 @@ def teamc_entry(request, entry):
                 attachment.used= True
                 attachment.save()
         else:
-            print form.errors    
-            
+            #print form.errors    
+            pass
     if entry.teamc_desc:
         desc = entry.teamc_desc
     else:
@@ -534,7 +534,8 @@ def send_message(request):
         try:
             data = json.loads(request.body)
         except Exception as inst:
-            print(inst)
+            #print(inst)
+            pass
 
         message = data['message']
         text = message
@@ -553,15 +554,16 @@ def send_message(request):
                 try:
                     user=User.objects.get(id = user_id)
                 except:
-                    print("No such User")
+                    #print("No such User")
+                    pass
                 else:
                     message.to.add(user)
                     message.save()
-                    print(message.to.all())
+                    #print(message.to.all())
 
             message.save()
         except Exception as inst:
-            print(inst)
+            #print(inst)
             return HttpResponse(status=404)
         #print("Create")
         return HttpResponse(status=200)
@@ -602,11 +604,11 @@ def get_member_list(max_results =0, starts_with=""):
         user_list = User.objects.filter(first_name__istartswith=starts_with)
         for user in user_list:
             staff_list.append(Member.objects.get(user = user))
-        print(staff_list)
+        #print(staff_list)
 #    if max_results > 0:
 #        if staff_list.count() > max_results:
 #            staff_list = staff_list[:max_results]
-    print("Returning")
+    #print("Returning")
     return staff_list
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
