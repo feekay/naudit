@@ -92,6 +92,8 @@ class Attachment(models.Model):
     entry = models.ForeignKey(Entry)
     key = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     item = models.FileField(upload_to= 'attachments')
+    #description = models.CharField(max_length = 500, null = True)
+    #comment = models.CharField(max_length =500, null =True)
     used = models.BooleanField(default=False)
     
     def __unicode__(self):
