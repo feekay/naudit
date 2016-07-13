@@ -87,23 +87,25 @@
                     </a>
                 </li>
                 {% if user_type == "a" %}
+                
                 <li>
                     <a href="/main/add_entry">Submit Entry</a>
                 </li>
+                <!---
                 <li>
                     <a href="/main/entries">Entries</a>
                 </li> 
-
+                -->
+                <li>
+                    <a href="/main/routes">Entries</a>
+                </li>
+                
                 <li>
                     <a href="/main/complete">Complete Entries</a>
                 </li>
 
                 <li>
                     <a href="/main/add_route">Add Route</a>
-                </li>
-                
-                <li>
-                    <a href="/main/routes">Routes</a>
                 </li>
                 
                 <li>
@@ -121,9 +123,12 @@
                 
 
                 {% if user_type == "b" %}
-                <li>
+             <!--   <li>
                     <a href="/main/entries">Entries</a>
-                </li> 
+                </li> -->
+                <li>
+                    <a href="/main/routes">Entries</a>
+                </li>
 
                 <li>
                     <a href="/main/pending">Pending Entries</a>
@@ -131,10 +136,6 @@
 
                 <li>
                     <a href="/main/complete">Complete Entries</a>
-                </li>
-
-                <li>
-                    <a href="/main/routes">Routes</a>
                 </li>
 
                 <li>
