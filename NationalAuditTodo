@@ -3,3 +3,6 @@
 #Make a base template and extend others     //Done 
 #Selecting Attachments and marking them as used //Done
 #Editing entries, make sure only owner can edit
+Issues:
+Check many-to-many duplicate relations
+Fix verfication process of entries.

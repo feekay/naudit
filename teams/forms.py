@@ -76,7 +76,21 @@ class RouteForm(forms.ModelForm):
     class Meta:
         model = Route
         exclude = []
+#------------------------------------------------------------------------------#
+class AttachmentForm(forms.ModelForm):
+    item = forms.FileField(required = False)
+    description = forms.CharField(required= False, max_length = 1500, widget=forms.Textarea())
 
+    def clean(self):
+        cleaned_data =  super(AttachmentForm, self).clean()
+        if cleaned_data['item'] or cleaned_data['description']:
+            pass
+        else:
+            raise forms.ValidationError('Add Text or Image')
+
+    class Meta:
+        model = Attachment
+        exclude = ['comment', 'key', 'entry', 'used']
 #------------------------------------------------------------------------------#
 class MyForm(forms.Form):
     file = MultiFileField(min_num=0, max_num=5, max_file_size=1024*1024*5, required = False)
@@ -145,17 +159,14 @@ class EntryForm(forms.ModelForm):
 #------------------------------------------------------------------------------#
     class Meta:
         model = Entry
-        exclude = ["owner", "route", "approved", "visited", "cleared","completed", "verified","finalized", "finalize_date", "teamb_desc","teamc_desc"]
+        exclude = ["owner", "b_owner", "c_owner", "route", "approved", "visited", "cleared","completed", "verified","finalized", "finalize_date", "teamb_desc","teamc_desc"]
 
 #------------------------------------------------------------------------------#
 
-class CForm(forms.Form):
-    desc = forms.CharField(required= True, max_length = 1500, widget=forms.Textarea(attrs={'required': ''}))
-    photos = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple())
-    
-    def __init__(self, entry, *args, **kwargs):
-        super(CForm, self).__init__(*args, **kwargs)
+class CForm(forms.ModelForm):
+    comment = forms.CharField(required= False, max_length = 1500, widget=forms.Textarea())
+    used = forms.BooleanField(required = False)   
+    class Meta:
+        model = Attachment
+        fields = ['comment', 'used']
 
-        options = [(attachment.key, attachment.item.name) for attachment in entry.attachment_set.all()]
-        self.fields['photos'].choices= options
-        self.fields['photos'].initial = [attachment.key for attachment in entry.attachment_set.all() if attachment.used]

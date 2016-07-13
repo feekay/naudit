@@ -49,9 +49,9 @@ class Entry(models.Model):
     end_date = models.DateField()
     route_date = models.DateField()
     description = models.TextField(max_length=1500)
-    teamb_desc = models.TextField(max_length=1500, null=True)
-    teamc_desc = models.TextField(max_length=1500, null= True)
     owner = models.ForeignKey(Member, null= False)
+    b_owner = models.ForeignKey(Member, null= True, related_name="bowner_set")
+    c_owner = models.ForeignKey(Member, null= True, related_name="cowner_set")
     route = models.ForeignKey(Route, null=True)
 
     approved = models.BooleanField(default=False)   #Team B verfies A's work
@@ -60,7 +60,7 @@ class Entry(models.Model):
     completed = models.BooleanField(default=False)  #C marks this after performing their job
     verified = models.BooleanField(default=False)   #Admin verifies C's work
     finalized = models.BooleanField(default=False)  #Admin performs this at the end
-    finalize_date = models.DateField(null=True)
+    finalize_date = models.DateField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         #Specify constraints
@@ -92,12 +92,12 @@ class Attachment(models.Model):
     entry = models.ForeignKey(Entry)
     key = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     item = models.FileField(upload_to= 'attachments')
-    #description = models.CharField(max_length = 500, null = True)
-    #comment = models.CharField(max_length =500, null =True)
+    description = models.CharField(max_length = 500, null = True)
+    comment = models.CharField(max_length =500, null =True)
     used = models.BooleanField(default=False)
     
     def __unicode__(self):
-        return str(self.entry) +"  "+ str(self.used)
+        return str(self.key) +"  "+ str(self.used)
 #------------------------------------------------------------------------------#    
 class Salary_based(models.Model):
     details = models.OneToOneField(Member)
@@ -109,13 +109,12 @@ class Salary_based(models.Model):
 class Entry_based(models.Model):
     details = models.OneToOneField(Member)
     rate = models.IntegerField()
-    entries = models.ManyToManyField(Entry)
     
     def entry_count(self):
-        return self.entries.filter(Q(approved= True)|Q(cleared = True)|Q(finalized = True)).count()
+        return Entries.objects.filter(Q(owner= self.details)|Q(b_owner= self.details)|Q(c_owner= self.details)).count()
 
     def calculate_salary(self):
-        pass
+        return self.rate* self.entry_count()
 
     def __unicode__(self):
         return str(self.details) +" "+ str(self.rate)

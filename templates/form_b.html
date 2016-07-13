@@ -1,0 +1,22 @@
+<h3>Attachments</h3>
+    {% for attachment in attachments %}
+        <div class="attachment-card">
+           <img src="media/{{attachment.item}}" height=200px width=200px>
+           <p>{{attachment.description}}<p>
+        </div>
+    {% endfor %}
+    <br>
+<form action="" method="post" enctype="multipart/form-data">
+  <input type="button" value="Add" id="add_more">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% for form in formset %}
+  <div class ="table">
+    <table>
+      {{ form.as_table }}        
+    </table>
+  </div>
+  {% endfor %}
+
+  <input type=submit value="Done" />
+</form>

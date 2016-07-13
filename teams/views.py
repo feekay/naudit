@@ -4,6 +4,7 @@ from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
 
+from teams.helpers import *
 from teams.forms import *
 from teams.models import Entry, Company
 
@@ -73,11 +74,11 @@ def create_entry(request):
             entry.owner = member
             entry.approved = approved
             entry.save()
-            add_entry(entry, member)
             log_activity(request, entry)
             return HttpResponseRedirect('/main/entries')
     else:
-        context_dic['form'] = EntryForm()
+        form = EntryForm()
+    context_dic['form'] = form
     return render(request, "add_entry.html",context_dic)
 
 #------------------------------------------------------------------------------#
@@ -85,10 +86,18 @@ def create_entry(request):
 def edit_entry(request, entry_id):
     context_dic ={}
     try:
+        member = Member.objects.get(user= request.user)
+    except:
+        return HttpResponse(status=404)
+    else:
+        emp_type = get_employee_type(member)
+    try:
         entry = Entry.objects.get(id= entry_id)
     except:
         return HttpResponse(status=404)
- 
+    if not edit_allowed(member):
+        return HttpResponseRedirect('/main/entries')
+
     if request.method == "POST":
         form = EntryForm(request.POST, instance = entry)
         if form.is_valid():
@@ -100,6 +109,42 @@ def edit_entry(request, entry_id):
         context_dic['form'] = EntryForm(instance = entry)
     return render(request, "add_entry.html", context_dic)
 
+#------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
+def verify_entry(request, entry_id):
+    context_dic= {}
+
+    try:
+        member = Member.objects.get(user= request.user)
+    except:
+        return HttpResponse(status=404)
+    else:
+        emp_type = get_employee_type(member)
+
+    try:
+        entry = Entry.objects.get(id = entry_id)
+    except:
+        return HttpResponse(status=404)
+
+    user_type = get_member_type(request.user)
+
+    if emp_type == "sal":
+        pending = True
+    else:
+        pending = False
+
+    if user_type == "b":
+        entry.visited = True
+        entry.cleared = pending
+        entry.save()
+    elif user_type == "c":
+        entry.completed = True
+        entry.verified = pending
+        entry.save()
+    elif user_type == "s":
+        entry.finalized = True
+        entry.save()
+    return HttpResponseRedirect('/main/entries')
 #------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_superuser)
 def add_company(request):
@@ -175,7 +220,6 @@ def entry(request, entry_id, pending=False):
         return HttpResponse(status=404)
 
     user_type = get_member_type(request.user)
-    context_dic["member_type"]=user_type
 
     #Send forms accoding to scenario
     #If the pending page is open send approval form
@@ -184,14 +228,16 @@ def entry(request, entry_id, pending=False):
         return handle_pending(request, entry, user_type, context_dic)
     else:     
         if user_type=="b":
-            form  = teamb_entry(request, entry)
-            context_dic["form"] = form
+            formset  = teamb_entry(request, entry)
+            context_dic["formset"] = formset
+            context_dic["attachments"] = Attachment.objects.filter(entry = entry)
         elif user_type=="c":
-            form = teamc_entry(request, entry)
-            context_dic["form"] = form
+            formset = teamc_entry(request, entry)
+            context_dic["formset"] = formset
+            context_dic["attachments"] = Attachment.objects.filter(entry = entry)
         else:
             return render(request, "view_entry.html", context_dic)
-        if form is None:
+        if formset is None:
             return HttpResponseRedirect('/main/entries')
     return render(request, "view_entry.html", context_dic)
 #------------------------------------------------------------------------------#
@@ -252,9 +298,19 @@ def pending_view(request):
     #Generates links on template based on 'page'
     context_dic["page"] = "pending"
     return render(request, "view_entries.html", context_dic)
-
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
+def complete_view(request):
+    context_dic = {}
+    
+    user_type = get_member_type(request.user)
 
+    context_dic["entries"]=get_complete(team = user_type)
+    
+    #Generates links on template based on 'page'
+    context_dic["page"] = "entries"
+    return render(request, "view_entries.html", context_dic)
+#------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_superuser)
 def emp_entries(request):
     employees = Entry_based.objects.all()
@@ -268,25 +324,6 @@ def emp_entries(request):
     context_dic["employees"] = emps
 
     return render(request, 'count.html', context_dic)
-#------------------------------------------------------------------------------#
-def handle_pending(request, entry, user_type, context_dic):
-    if request.method=="POST":
-    #    print "Post", user_type
-        if user_type == "b":
-            entry.approved = True
-            log_activity(request, entry,"Approved")
-            entry.save()
-        if user_type == "c":
-            entry.cleared = True
-            log_activity(request, entry, "Accepted")
-            entry.save()
-        if user_type =="s":
-            entry.verified = True
-            log_activity(request, entry, "Verified")
-            entry.save()
-        return HttpResponseRedirect('/main/entries')
-    return render(request, 'pending_entry.html', context_dic)
-
 #------------------------------------------------------------------------------#
 def logout_view(request):
     log_activity(request,None, "Logged out")
@@ -335,195 +372,14 @@ def settings(request):
         context_dic['member_form'] = handle_member_change(request)
 
     return render(request, "settings.html", context_dic)
-
 #------------------------------------------------------------------------------#
-def handle_member_change(request):
-    try:
-        member_inst = Member.objects.get(user= request.user)
-    except Member.DoesNotExist:
-        return None
-    if request.method == "POST":
-        form = MemberForm(request.POST, instance=member_inst)
-        if form.is_valid():
-            member =form.save(commit=False)
-            member.save()
-            log_activity(request,action="Info updated")
-            form = MemberForm(instance=member_inst)
-    else:
-        form = MemberForm(instance=member_inst)
-    return form
-#------------------------------------------------------------------------------#
-def handle_password_change(request):
-    if request.method == "POST" \
-    and 'old_password' in request.POST \
-    and 'new_password' in request.POST:
-        old_password = request.POST['old_password']
-        new_password = request.POST['new_password']
-        user = authenticate(username = request.user.username, password = old_password)
-        
-        if user is not None:
-            if user.is_active:
-                user.set_password(new_password)
-                user.save()
-                login(request, user)
-                return True
-        else:
-            return False  
-        
-    else:
-        return None
-#------------------------------------------------------------------------------#
-def get_entries(team="a"):
-    if team =="a":
-        return Entry.objects.filter(visited = False)
-    elif team =="b":
-        return Entry.objects.filter(approved = True, completed = False)
-    elif team =="c":
-        return Entry.objects.filter(visited = True, cleared = True, verified = False)
-    #Super User
-    elif team =="s":
-        return Entry.objects.all()
-
-#------------------------------------------------------------------------------#
-
-def get_pending(team="b"):
-    if team =="b":
-        return Entry.objects.filter(approved = False)
-    elif team =="c":
-        return Entry.objects.filter(visited = True, cleared = False)
-    #Super User
-    elif team =="s":
-        return Entry.objects.filter(completed = True, verified= False)
-
-#------------------------------------------------------------------------------#
-def get_employee_type(member):
-    try:
-        temp = Salary_based.objects.get(details = member)
-    except:
-        pass
-    else:
-        user_type = "sal"
-        
-    try:
-        temp = Entry_based.objects.get(details = member)
-    except:
-        pass
-    else:
-        user_type = "ent"
-
-    return user_type
-
-#------------------------------------------------------------------------------#        
-def get_member_type(user):
-    if user.is_superuser:
-        user_type = "s"
-    else:
-        member = Member.objects.get(user=user)
-        user_type = member.member_type
-
-    return user_type
-
-#------------------------------------------------------------------------------#        
-    
-def teamb_entry(request, entry):
-    try:
-        member = Member.objects.get(user=request.user)
-    except:
-        return None
-    #Check employee type and set the value of clear
-    employee = get_employee_type(member)
-    if employee == "sal":
-        cleared = True
-    else:
-        cleared = False
-    
-    if request.method == "POST":
-        form = MyForm(request.POST, request.FILES)
-        if form.is_valid():
-            for f in request.FILES.getlist('file'):
-                Attachment.objects.create(entry=entry, item=f)
-            entry.visited = True
-            entry.cleared = cleared
-            #If description proveided include description
-            if 'desc' in request.POST:
-                entry.teamb_desc = form.cleaned_data['desc']
-
-            entry.save()
-            
-            #Attach entry 'entry' to member
-            log_activity(request,entry, action="Edited")
-            add_entry(entry, member)
-            return None
-    
-    else:
-
-        if entry.teamb_desc:
-            desc = entry.teamb_desc
-        else:
-            desc = ""
-        form = MyForm(initial={'desc': desc})
-    return form
-
-#------------------------------------------------------------------------------#
-def teamc_entry(request, entry):
-    try:
-        member = Member.objects.get(user=request.user)
-    except:
-        return None
-    #Check employee type and set the value of verified
-    employee = get_employee_type(member)
-
-    if employee == "sal":
-        verified = True
-    else:
-        verified = False
-
-    if request.method=="POST":
-        form = CForm(entry, request.POST)
-        if form.is_valid():
-            #ADD Photo check handling
-            
-            entry.teamc_desc = form.cleaned_data['desc']
-            entry.completed = True
-            entry.save()
-            log_activity(request, entry, action="Edited")
-            add_entry(entry, member)
-
-            for key in form.cleaned_data['photos']:
-                attachment = Attachment.objects.get(key=key)
-                attachment.used= True
-                attachment.save()
-        else:
-            #print form.errors    
-            pass
-    if entry.teamc_desc:
-        desc = entry.teamc_desc
-    else:
-        desc =''
-    form = CForm(entry, initial={'desc': desc})
-    
-    return form
-
-#------------------------------------------------------------------------------#
-def add_entry(entry, member):
-    if get_employee_type(member) == "ent":
-        try:
-            emp = Entry_based.objects.get(details = member)
-        except:
-            pass
-        else:
-            emp.entries.add(entry)
-            emp.save()
 ################################################################################
 #  MESSAGING RELATED FUNCTIONS
 ################################################################################
 
-#------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_authenticated)
 def messages(request):
     context_dic ={}
-    if not request.user.is_superuser:
-        context_dic["user_type"]= get_member_type(request.user)
     return render(request,'messages.html' ,context_dic)
 
 #------------------------------------------------------------------------------#
@@ -625,10 +481,4 @@ def suggest_member(request):
     data = serializers.serialize("json",staff_list)
     #print( data)
     return HttpResponse(data, content_type='application/json')
-#------------------------------------------------------------------------------#
-def log_activity(request, obj=None, action="Created"):
-    if obj:
-        activity = Activity.objects.create(user= request.user.username, obj= str(obj), action=action)
-    else:
-        activity = Activity.objects.create(user= request.user.username, action=action)
-    activity.save()
+

@@ -1,0 +1,28 @@
+<h3>Attachments</h3>
+    
+
+<form action="" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  <table>
+    {% for form in formset %}
+        {% for attachment in attachments %}
+            {% if form.key.value == attachment.key %}
+              <div class='attachment-card'>
+                <p>{{attachment.description}}<p>  
+                <label class="img_radio" for="{{ form.used.id_for_label }}">
+                    {{ form.used }}
+                    <img src="media/{{attachment.item}}" width=200px height=200px />
+                    <span>{{form.used.choice_value}}<span>
+                </label>
+                <br>
+                {{form.comment.label}}
+                {{form.comment}}
+                {{form.key}}
+              </div>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+  </table>
+  <input type=submit value="Done" />
+</form>
