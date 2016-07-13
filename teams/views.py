@@ -237,8 +237,8 @@ def entry(request, entry_id, pending=False):
             context_dic["attachments"] = Attachment.objects.filter(entry = entry)
         else:
             return render(request, "view_entry.html", context_dic)
-        if formset is None:
-            return HttpResponseRedirect('/main/entries')
+        #if formset is None:
+        #    return HttpResponseRedirect('/main/entries')
     return render(request, "view_entry.html", context_dic)
 #------------------------------------------------------------------------------#
 

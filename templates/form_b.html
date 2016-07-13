@@ -6,17 +6,19 @@
         </div>
     {% endfor %}
     <br>
-<form action="" method="post" enctype="multipart/form-data">
-  <input type="button" value="Add" id="add_more">
-  {% csrf_token %}
-  {{ formset.management_form }}
-  {% for form in formset %}
-  <div class ="table">
-    <table>
-      {{ form.as_table }}        
-    </table>
-  </div>
-  {% endfor %}
+{% if formset %}
+ <form action="" method="post" enctype="multipart/form-data">
+   <input type="button" value="Add" id="add_more">
+   {% csrf_token %}
+   {{ formset.management_form }}
+   {% for form in formset %}
+   <div class ="table">
+     <table>
+       {{ form.as_table }}        
+     </table>
+   </div>
+   {% endfor %}
 
-  <input type=submit value="Done" />
-</form>
+   <input type=submit value="Done" />
+ </form>
+{% endif %}

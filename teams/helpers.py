@@ -148,11 +148,9 @@ def teamb_entry(request, entry):
             for instance in instances:
                 instance.entry = entry
                 instance.save()
-            print member
-            entry.b_onwer = member
-            print entry.b_owner
-            entry.save()
-            
+            #print member
+            member.bowner_set.add(entry)
+            member.save()
     formset = AttachmentFormSet(queryset=Attachment.objects.none())
     return formset
 #------------------------------------------------------------------------------#
@@ -170,8 +168,8 @@ def teamc_entry(request, entry):
         if formset.is_valid():
             instances = formset.save()
             log_activity(request, entry, action="Edited")
-            entry.c_onwer = member
-            entry.save()
+            member.cowner_set.add(entry)
+            member.save()
 
     formset = CFormset(queryset= Attachment.objects.filter(entry=entry))
     return formset

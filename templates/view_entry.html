@@ -3,10 +3,10 @@
 {% block main %}
 <h1>{{entry.route_date}}</h1>
                         <div>
-                            {% if user_type == "b" and not entry.visited %}
+                            {% if formset and user_type == "b" and not entry.visited %}
                                 <a href="/main/verify/{{entry.id}}">Complete</a>
 
-                            {% elif user_type == "c" and not entry.completed %}
+                            {% elif formset and user_type == "c" and not entry.completed %}
                                 <a href="/main/verify/{{entry.id}}">Complete</a>
 
                             {% elif user_type == "s" and entry.verified and not entry.finalized %}

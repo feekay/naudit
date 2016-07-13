@@ -2,7 +2,9 @@
 #Connect Entries based on Address
 #Make a base template and extend others     //Done 
 #Selecting Attachments and marking them as used //Done
-#Editing entries, make sure only owner can edit
+#Editing entries, make sure only owner can edit - Work in progess, third issue
+
 Issues:
-Check many-to-many duplicate relations
-Fix verfication process of entries.
+1) Check many-to-many duplicate relations
+2) Fix verfication process of entries.
+3) Save owner issue in teamb and teamc
