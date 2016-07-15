@@ -111,7 +111,7 @@ class Entry_based(models.Model):
     rate = models.IntegerField()
     
     def entry_count(self):
-        return Entries.objects.filter(Q(owner= self.details)|Q(b_owner= self.details)|Q(c_owner= self.details)).count()
+        return Entry.objects.filter(Q(owner= self.details)|Q(b_owner= self.details)|Q(c_owner= self.details)).count()
 
     def calculate_salary(self):
         return self.rate* self.entry_count()
