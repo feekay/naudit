@@ -20,6 +20,7 @@ def handle_pending(request, entry, user_type, context_dic):
             entry.approved = True
             log_activity(request, entry,"Approved")
             entry.save()
+            #return HttpResponseRedirect('/main')
         if user_type == "c":
             entry.cleared = True
             log_activity(request, entry, "Accepted")
@@ -28,7 +29,7 @@ def handle_pending(request, entry, user_type, context_dic):
             entry.verified = True
             log_activity(request, entry, "Verified")
             entry.save()
-        return HttpResponseRedirect('/main/entries')
+        return HttpResponseRedirect('/main')
     return render(request, 'pending_entry.html', context_dic)
 
 #------------------------------------------------------------------------------#
