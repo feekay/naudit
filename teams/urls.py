@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^login/$', views.login_view),
     url(r'^logout/$', views.logout_view),
     url(r'^complete/$', views.complete_view),
+    url(r'^finished/$', views.finish_view),
     url(r'^entries/$', views.entries_view),
     url(r'^edit/(?P<entry_id>[\d]+)/$', views.edit_entry),
     url(r'^verify/(?P<entry_id>[\d]+)/$', views.verify_entry),

@@ -133,6 +133,9 @@ def get_member_type(user):
 
 #------------------------------------------------------------------------------#
 def teamb_entry(request, entry):
+    if entry.completed:
+        return None
+
     try:
         member = Member.objects.get(user= request.user)
     except:
@@ -156,6 +159,9 @@ def teamb_entry(request, entry):
     return formset
 #------------------------------------------------------------------------------#
 def teamc_entry(request, entry):
+    if entry.completed:
+        return None
+
     try:
         member = Member.objects.get(user= request.user)
     except:

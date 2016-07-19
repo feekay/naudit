@@ -311,6 +311,14 @@ def complete_view(request):
     context_dic["page"] = "entries"
     return render(request, "view_entries.html", context_dic)
 #------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
+def finish_view(request):
+    context_dic = {}
+
+    context_dic["entries"]=Entry.objects.filter(finalized= True)
+    context_dic["page"] = "entries"
+    return render(request, "view_entries.html", context_dic)
+#------------------------------------------------------------------------------#
 @user_passes_test(lambda u: u.is_superuser)
 def emp_entries(request):
     employees = Entry_based.objects.all()
