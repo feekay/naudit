@@ -6,7 +6,7 @@
                             {% for route in routes %}
                                 <div class='route-card'>
                                     
-                                    <a href="/main/routes/{{route.id}}" >Date: {{route.route_date}}</a>
+                                    <a href="/main/{{page}}/{{route.id}}" >Date: {{route.route_date}}</a>
                                     <p>Distance: {{route.distance}}</p>
                                     <p>Expenses: {{route.expenses}}</p>
                                     <img src='/media/{{route.route_image}}'></img>

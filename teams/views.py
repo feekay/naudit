@@ -75,7 +75,7 @@ def create_entry(request):
             entry.approved = approved
             entry.save()
             log_activity(request, entry)
-            return HttpResponseRedirect('/main/entries')
+            return HttpResponseRedirect('/main/')
     else:
         form = EntryForm()
     context_dic['form'] = form
@@ -275,6 +275,7 @@ def members_view(request):
 def routes_view(request):
     context_dic = {}
     context_dic["routes"]=Route.objects.all()
+    context_dic["page"] ="routes"
     return render(request, "view_routes.html", context_dic)
 #------------------------------------------------------------------------------#
 
@@ -287,14 +288,33 @@ def route_view(request, route_id):
     #print route.entry_set.count()
     return render(request, "view_route.html", context_dic)
 #------------------------------------------------------------------------------#
+
 @user_passes_test(lambda u: u.is_authenticated)
-def pending_view(request):
+def pending(request):
+    context_dic = {}
+    user_type = get_member_type(request.user)
+    if user_type == 'b':
+        context_dic["routes"]=Route.objects.all()
+    
+        context_dic["page"] ="pend"
+        return render(request, "view_routes.html", context_dic)
+    else:
+        return pending_view(request)
+
+#------------------------------------------------------------------------------#
+@user_passes_test(lambda u: u.is_authenticated)
+def pending_view(request, route_id=None):
     context_dic = {}
     
     user_type = get_member_type(request.user)
 
-    context_dic["entries"]=get_pending(team = user_type)
-    
+    if route_id:
+        route = Route.objects.get(id= route_id)
+        context_dic["entries"]=get_pending(team = user_type, route=route)
+
+    else:
+        context_dic["entries"]=get_pending(team = user_type)
+
     #Generates links on template based on 'page'
     context_dic["page"] = "pending"
     return render(request, "view_entries.html", context_dic)

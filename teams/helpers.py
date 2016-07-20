@@ -82,9 +82,9 @@ def get_entries(team="a"):
 
 #------------------------------------------------------------------------------#
 
-def get_pending(team="b"):
+def get_pending(team="b", route=None):
     if team =="b":
-        return Entry.objects.filter(approved = False)
+        return route.entry_set.filter(approved = False)
     elif team =="c":
         return Entry.objects.filter(visited = True, cleared = False)
     #Super User
