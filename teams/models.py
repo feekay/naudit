@@ -52,7 +52,7 @@ class Entry(models.Model):
     owner = models.ForeignKey(Member, null= False)
     b_owner = models.ForeignKey(Member, null= True, blank=True, related_name="bowner_set")
     c_owner = models.ForeignKey(Member, null= True, blank=True, related_name="cowner_set")
-    route = models.ForeignKey(Route, null=True)
+    route = models.ForeignKey(Route, null=True, blank=True)
 
     approved = models.BooleanField(default=False)   #Team B verfies A's work
     visited = models.BooleanField(default=False)    #Team B marks after getting it done
