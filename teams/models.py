@@ -50,8 +50,8 @@ class Entry(models.Model):
     route_date = models.DateField()
     description = models.TextField(max_length=1500)
     owner = models.ForeignKey(Member, null= False)
-    b_owner = models.ForeignKey(Member, null= True, related_name="bowner_set")
-    c_owner = models.ForeignKey(Member, null= True, related_name="cowner_set")
+    b_owner = models.ForeignKey(Member, null= True, blank=True, related_name="bowner_set")
+    c_owner = models.ForeignKey(Member, null= True, blank=True, related_name="cowner_set")
     route = models.ForeignKey(Route, null=True)
 
     approved = models.BooleanField(default=False)   #Team B verfies A's work
